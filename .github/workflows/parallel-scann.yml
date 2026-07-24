@@ -29,4 +29,35 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v7
         with:
-          fetch-depth: 0    
+          fetch-depth: 0
+          
+      - name: Configure Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Install project dependencies
+        run: npm install --ignore-scripts
+
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+        
+      - name: Create Snyk report directory
+        run: mkdir -p reports/snyk
+        
+      - name: Run Snyk Open Source scan
+        id: snyk_scan
+        env:
+          SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
+        run: |
+          set +e
+          
+          snyk test \
+            --file=package.json \
+            --package-manager=npm \
+            --json-file-output=reports/snyk/snyk-results.json \
+            --sarif-file-output=reports/snyk/snyk-results/sarif
+
+          exit_code=$?
+          set -e
