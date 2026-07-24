@@ -13,10 +13,20 @@ jobs:
         - name: Checkout source code
           uses: actions/checkout@v7
 
+        - name: Configure Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: "24"
+            cache: npm
+
+        - name: Install project dependencies
+          run: npm install --ignore-scripts
+
         - name: Install Snyk CLI
           uses: snyk/actions/setup@master
 
         - name: Run Snyk Open Source scan
           env:
             POC_SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
-          run: snyk test
+          run: |
+            snyk test --file=package.json --package-manager=npm
