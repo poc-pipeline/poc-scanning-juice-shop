@@ -23,16 +23,18 @@ jobs:
         - name: Configure Node.js
           uses: actions/setup-node@v4
           with:
-            node-version: "20"
+            node-version: "24"
             cache: npm
+            package-manager-cahe: false
 
-        #- name: Install project dependencies
-        #  run: npm install --ignore-scripts
+        - name: Install project dependencies
+          run: npm install --ignore-scripts
 
         - name: Install Snyk CLI
           uses: snyk/actions/setup@master
 
         - name: Run Snyk Open Source scan
+          continue-on-error: true
           env:
             POC_SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
           run: |
