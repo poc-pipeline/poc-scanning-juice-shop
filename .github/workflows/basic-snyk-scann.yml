@@ -13,14 +13,21 @@ jobs:
         - name: Checkout source code
           uses: actions/checkout@v7
 
+        - name: Verify project
+          run: |
+            echo "Verify items"
+            pwd
+            ls -la
+
+
         - name: Configure Node.js
           uses: actions/setup-node@v4
           with:
             node-version: "20"
             cache: npm
 
-        - name: Install project dependencies
-          run: npm install --ignore-scripts
+        #- name: Install project dependencies
+        #  run: npm install --ignore-scripts
 
         - name: Install Snyk CLI
           uses: snyk/actions/setup@master
