@@ -1,4 +1,4 @@
-name: Build
+name: basic-sonar-scann
 on:
   #push:
   #  branches:
@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Init Pipeline
         run: |
-          echo "Init pipeline"
+          echo "Init pipeline to Test Sonar"
           sleep 5
           
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1

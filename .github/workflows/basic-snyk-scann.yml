@@ -1,0 +1,22 @@
+name: basic-snyk-scann
+on:
+  workflow_dispatch:
+jobs:
+    snyk:
+      name: Snyk
+      runs-on: ubuntu-latest
+      steps:
+        - name: Init Pipeline
+          run: |
+            echo "Init Pipeline to Test Snyk"
+
+        - name: Checkout source code
+          uses: actions/checkout@v7
+
+        - name: Install Snyk CLI
+          uses: snyk/actions/setup@master
+
+        - name: Run Snyk Open Source scan
+          env:
+            POC_SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
+          run: snyk test
