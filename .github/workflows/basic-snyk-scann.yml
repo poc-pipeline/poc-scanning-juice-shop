@@ -35,6 +35,6 @@ jobs:
         - name: Run Snyk Open Source scan
           continue-on-error: true
           env:
-            POC_SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
+            SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
           run: |
             snyk test --file=package.json --package-manager=npm
