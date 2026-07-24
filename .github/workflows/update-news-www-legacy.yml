@@ -1,9 +1,9 @@
 name: "Update news on owasp.org/www-project-juice-shop (legacy)"
 
 on:
-  release:
-    types: [ published ]
-
+  #release:
+  #  types: [ published ]
+  workflow_dispatch:
 jobs:
   UpdateNewsOnWebsite:
     runs-on: ubuntu-latest

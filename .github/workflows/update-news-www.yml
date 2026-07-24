@@ -1,9 +1,9 @@
 name: "Update news on owasp-juice.shop"
 
 on:
-  release:
-    types: [ published ]
-
+  #release:
+  #  types: [ published ]
+  workflow_dispatch:
 jobs:
   UpdateNewsOnWebsite:
     runs-on: ubuntu-latest
