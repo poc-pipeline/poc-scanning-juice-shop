@@ -5,6 +5,10 @@ on:
 
 jobs:
     sonar:
+      name: SonarQube Cloud Scan
+      runs-on: ubuntu-latest    
+
+      steps:  
       - name: Checkout source code
         uses: actions/checkout@v7
         with:
@@ -18,6 +22,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.POC_SONAR_TOKEN }}    
 
     snyk:
+      name: Snyk Open Source Scan
+      runs-on: ubuntu-latest    
+
+      steps:  
       - name: Checkout source code
         uses: actions/checkout@v7
         with:
