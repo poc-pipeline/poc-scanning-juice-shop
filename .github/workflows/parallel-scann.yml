@@ -63,7 +63,8 @@ jobs:
           set -e
 
       - name: Publish snapshot to Snyk Portal
-        if: github.ref == 'ref/heads/main'
+        # Remove this line and fix the if when you are ready 
+        # i f: github.ref == 'ref/heads/main'
         env:
           SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
         run: |
