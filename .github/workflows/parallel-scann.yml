@@ -70,7 +70,7 @@ jobs:
         run: |
           snyk monitor \
             --file=package.json \
-            --package-manage=npm \
+            --package-manager=npm \
             --org="$SNYK_ORG_ID" \
             --project-name="${{ github.repository }}" \
             --target-reference="${{ github.ref_name }}" \
