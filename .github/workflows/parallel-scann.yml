@@ -6,7 +6,13 @@ on:
 jobs:
     sonar:
       name: SonarQube Cloud Scan
-      runs-on: ubuntu-latest    
+      runs-on: ubuntu-latest
+      
+      outputs:
+        scan_status: ${{ steps.sonar_outputs.outputs.scan_status }}
+        quality_gate: ${{ steps.sonar_outputs.outputs.quality_gate }}
+        artifact_name: sonar-reports
+
 
       steps:  
       - name: Checkout source code
@@ -19,7 +25,55 @@ jobs:
         continue-on-error: true
         uses: SonarSource/sonarqube-scan-action@v8.2.1
         env:
-          SONAR_TOKEN: ${{ secrets.POC_SONAR_TOKEN }}    
+          SONAR_TOKEN: ${{ secrets.POC_SONAR_TOKEN }}
+          
+      - name: Create Sonar report directory
+        if: always()
+        run: mkdir -p reports/sonar
+
+      - name: Verify current workspace
+        run: |
+          cat /etc/os-release
+          pwd
+          ls -la
+          tree  
+
+      - name: Preserve Sonar task metadata
+        if: always()
+        run: |
+          if [ -f .scannerwork/report-task.txt ]; then
+            cp .scannerwork/report-task.txt reports/sonar/report-task.txt
+          fi
+
+      - name: Obtain Sonar quality gate
+        id: sonar_api
+        if: always()
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.POC_SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ vars.POC_SONAR_PROJECT_JUICE_SHOP_KEY }}
+        run: |
+          curl --silent \
+            --show-error \
+            --fail-with-body \
+            --header "Authorization: Bearer ${SONAR_TOKE}" \
+            --get \
+            --data-urlencode "projectKey=${SONAR_PROJECT_KEY}" \
+            "https://sonarcloud.io/api/qualitygates/project_status" \
+            --output reports/sonar/quality-gate.json
+            
+          echo "#######################################################"
+          cat ./reports/sonar/quality-gate.json
+          echo "#######################################################"
+
+      - name: Upload Sonar reports
+        if: always()
+        uses: actions/upload-artifacts@v4
+        with:
+          name: sonar-reports
+          path: reports/sonar
+          if-no-files-found: warn
+          retention-days: 15
 
     snyk:
       name: Snyk Open Source Scan
