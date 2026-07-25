@@ -61,3 +61,16 @@ jobs:
 
           exit_code=$?
           set -e
+
+      - name: Publish snapshot to Snyk Portal
+        if: github.ref == 'ref/heads/main'
+        env:
+          SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
+        run: |
+          snyk monitor \
+            --file=package.json \
+            --package-manage=npm \
+            --org="${{ secrets.POC_SNYK-ORG_ID }}"
+            --project-name="${{ github.repository }}"
+            --target-reference="${{ github.ref_name }}"
+            --remote-repo-url="${{ github.server_url }}/${{ github.repository }}" 
