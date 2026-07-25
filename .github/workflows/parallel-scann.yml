@@ -65,9 +65,28 @@ jobs:
             --output reports/sonar/quality-gate.json
             
           echo "#######################################################"
-          cat ./reports/sonar/quality-gate.json
+          cat ./reports/sonar/quality-gate.json | jq
           echo "#######################################################"
 
+      - name: Obtain first page of Sonar Issues
+        if: always()
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.POC_SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ vars.POC_SONAR_PROJECT_JUICE_SHOP_KEY }}
+        run: |
+          curl --silent \
+            --show-error \
+            --fail-with-body \
+            --header "Authorization: Bearer ${SONAR_TOKEN}" \
+            --get \
+            --data-urlencode "componentKeys=${SONAR_PROJECT_KEY}" \
+            --data-urlencode "ps=500" \
+            "https://sonarcloud.io/api/issues/search" \
+            --output reports/sonar/issues-page-1.json  
+
+
+      
       #- name: Upload Sonar reports
       #  i f: always()
       #  uses: actions/upload-artifact@v4
