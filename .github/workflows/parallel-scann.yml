@@ -36,13 +36,15 @@ jobs:
           cat /etc/os-release
           pwd
           ls -la
-          tree  
 
       - name: Preserve Sonar task metadata
         if: always()
         run: |
           if [ -f .scannerwork/report-task.txt ]; then
+            echo "inside .scannerwork"
             cp .scannerwork/report-task.txt reports/sonar/report-task.txt
+            echo "report-task.txt is "
+            cat reports/sonar/report-task.txt
           fi
 
       - name: Obtain Sonar quality gate
@@ -56,7 +58,7 @@ jobs:
           curl --silent \
             --show-error \
             --fail-with-body \
-            --header "Authorization: Bearer ${SONAR_TOKE}" \
+            --header "Authorization: Bearer ${SONAR_TOKEN}" \
             --get \
             --data-urlencode "projectKey=${SONAR_PROJECT_KEY}" \
             "https://sonarcloud.io/api/qualitygates/project_status" \
@@ -66,14 +68,14 @@ jobs:
           cat ./reports/sonar/quality-gate.json
           echo "#######################################################"
 
-      - name: Upload Sonar reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sonar-reports
-          path: reports/sonar
-          if-no-files-found: warn
-          retention-days: 15
+      #- name: Upload Sonar reports
+      #  i f: always()
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: sonar-reports
+      #    path: reports/sonar
+      #    if-no-files-found: warn
+      #    retention-days: 15
 
     snyk:
       name: Snyk Open Source Scan
