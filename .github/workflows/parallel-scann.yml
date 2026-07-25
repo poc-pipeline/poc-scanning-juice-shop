@@ -63,15 +63,15 @@ jobs:
           set -e
 
       - name: Publish snapshot to Snyk Portal
-        # Remove this line and fix the if when you are ready 
-        # i f: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         env:
           SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
+          SNYK_ORG_ID: ${{ secrets.POC_SNYK_ORG_ID }} 
         run: |
           snyk monitor \
             --file=package.json \
             --package-manage=npm \
-            --org="${{ secrets.POC_SNYK_ORG_ID }}"
-            --project-name="${{ github.repository }}"
-            --target-reference="${{ github.ref_name }}"
+            --org="$SNYK_ORG_ID" \
+            --project-name="${{ github.repository }}" \
+            --target-reference="${{ github.ref_name }}" \
             --remote-repo-url="${{ github.server_url }}/${{ github.repository }}" 
