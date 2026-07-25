@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload Sonar reports
         if: always()
-        uses: actions/upload-artifacts@v4
+        uses: actions/upload-artifact@v4
         with:
           name: sonar-reports
           path: reports/sonar
