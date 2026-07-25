@@ -85,6 +85,29 @@ jobs:
             "https://sonarcloud.io/api/issues/search" \
             --output reports/sonar/issues-page-1.json  
 
+      - name: Create Sonar outputs
+        id: sonar_output  
+        if: always()
+        env:
+          SCAN_STATUS: ${{ steps.sonar_scan.outcome }} 
+        run: |
+          quality_gate="UNKNOWN"
+          
+          if [ -f reports/sonar/quality-gate.json ]; then
+            quality_gate="$(
+              jq -r '.projectStatus.status // "UNKNOWN"' \
+                reports/sonar/quality-gate.json 
+            )"
+          fi
+
+          echo "scan_status=${SCAN_STATUS}" >> "$GITHUB_OUTPUT"
+          echo "quality_gate=${quality_gate}" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## SonarQube"
+            echo "- Scan: ${SCAN_STATUS}"
+            echo "- Quality Gate: ${quality_gate}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       
       #- name: Upload Sonar reports
