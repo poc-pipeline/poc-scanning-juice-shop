@@ -125,7 +125,7 @@ jobs:
       
       outputs:
         scan_exit_code: ${{ steps.snyk_scan.outputs.exit_code }}
-        vulnerabilities: ${{ steps.snyk_scan.outputs.vulnerabilities }}
+        vulnerabilities: ${{ steps.snyk_outputs.outputs.vulnerabilities }}
         artifact_name: snyk-reports 
 
       steps:  
@@ -164,31 +164,18 @@ jobs:
 
           exit_code=$?
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
-          
-          
-
-      - name: Publish snapshot to Snyk Portal
-        if: github.ref == 'refs/heads/main'
-        env:
-          SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
-          SNYK_ORG_ID: ${{ secrets.POC_SNYK_ORG_ID }} 
-        run: |
-          snyk monitor \
-            --file=package.json \
-            --package-manager=npm \
-            --org="$SNYK_ORG_ID" \
-            --project-name="${{ github.repository }}" \
-            --target-reference="${{ github.ref_name }}" \
-            --remote-repo-url="${{ github.server_url }}/${{ github.repository }}"
+          exit 0
+      
             
       - name: Create Snyk outputs
+        id: snyk_outputs
         run: |
           set -e
 
           vulnerabilities=0
 
           if [ -f reports/snyk/snyk-results.json ]; then
-            cat reports/snyk/snyk-results.json | jq
+            # cat reports/snyk/snyk-results.json | jq
 
             vulnerabilities="$(
               jq '
@@ -208,6 +195,21 @@ jobs:
             echo "- Exit code: ${exit_code}"
             echo "- Vulnerabilities: ${vulnerabilities}"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish snapshot to Snyk Portal
+        id: snyk_monitor
+        if: github.ref == 'refs/heads/main'
+        env:
+          SNYK_TOKEN: ${{ secrets.POC_SNYK_TOKEN }}
+          SNYK_ORG_ID: ${{ secrets.POC_SNYK_ORG_ID }} 
+        run: |
+          snyk monitor \
+            --file=package.json \
+            --package-manager=npm \
+            --org="$SNYK_ORG_ID" \
+            --project-name="${{ github.repository }}" \
+            --target-reference="${{ github.ref_name }}" \
+            --remote-repo-url="${{ github.server_url }}/${{ github.repository }}"
 
       - name: Upload Snyk reports
         if: always()
