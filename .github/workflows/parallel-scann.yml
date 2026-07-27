@@ -189,11 +189,10 @@ jobs:
           vulnerabilities=0
 
           if [ -f reports/snyk/snyk-results.json ]; then
-
             vulnerabilities="$(
               jq '
                 if type == "array" then
-                  map((.vulnerabilities // [] ) |  length) | add ) // 0
+                  map((.vulnerabilities // [] ) |  length) | add  // 0 
                 else
                   (.vulnerabilities // []) | length 
                 end
