@@ -165,24 +165,34 @@ jobs:
           exit_code=$?
           echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
           exit 0
+
+      - name: Show snyk report
+        if: always()
+        run: |
+          if [ -f reports/snyk/snyk-results.json ]; then
+            cat reports/snyk/snyk-results.json | jq
+          fi  
+             
       
             
       - name: Create Snyk outputs
         id: snyk_outputs
+        if: always()
+        env:
+          SNYK_EXIT_CODE: ${{ steps.snyk_scan.outputs.exit_code }}
         run: |
           set -e
 
           vulnerabilities=0
 
           if [ -f reports/snyk/snyk-results.json ]; then
-            # cat reports/snyk/snyk-results.json | jq
 
             vulnerabilities="$(
               jq '
                 if type == "array" then
-                  map(.vulnerabilities // [] length ) | add
+                  map((.vulnerabilities // [] ) |  length) | add ) // 0
                 else
-                  (.vulnerabilities // [] length )
+                  (.vulnerabilities // []) | length 
                 end
               ' reports/snyk/snyk-results.json
             )"
@@ -192,7 +202,7 @@ jobs:
 
           {
             echo "### Snyk Open Source"
-            echo "- Exit code: ${exit_code}"
+            echo "- Exit code: ${SNYK_EXIT_CODE:-UNKNOWN}"
             echo "- Vulnerabilities: ${vulnerabilities}"
           } >> "$GITHUB_STEP_SUMMARY"
 
