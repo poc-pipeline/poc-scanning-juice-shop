@@ -63,7 +63,10 @@ jobs:
             --data-urlencode "projectKey=${SONAR_PROJECT_KEY}" \
             "https://sonarcloud.io/api/qualitygates/project_status" \
             --output reports/sonar/quality-gate.json
-            
+
+      - name: Show quality gatefile
+        if: always()
+        run: |
           echo "#######################################################"
           cat ./reports/sonar/quality-gate.json | jq
           echo "#######################################################"
