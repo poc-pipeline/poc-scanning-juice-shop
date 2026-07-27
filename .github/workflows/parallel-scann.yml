@@ -121,7 +121,12 @@ jobs:
 
     snyk:
       name: Snyk Open Source Scan
-      runs-on: ubuntu-latest    
+      runs-on: ubuntu-latest 
+      
+      output:
+        scan_exit_code: ${{ steps.snyk_scan.outputs.exit_code }}
+        vulnerabilities: ${{ steps.snyk_scan.outputs.vulnerabilities }}
+        artifact_name: snyk-reports 
 
       steps:  
       - name: Checkout source code
@@ -158,7 +163,9 @@ jobs:
             --sarif-file-output=reports/snyk/snyk-results/sarif
 
           exit_code=$?
-          set -e
+          echo "exit_code=${exit_code}" >> "$GITHUB_OUTPUT"
+          
+          
 
       - name: Publish snapshot to Snyk Portal
         if: github.ref == 'refs/heads/main'
@@ -172,4 +179,41 @@ jobs:
             --org="$SNYK_ORG_ID" \
             --project-name="${{ github.repository }}" \
             --target-reference="${{ github.ref_name }}" \
-            --remote-repo-url="${{ github.server_url }}/${{ github.repository }}" 
+            --remote-repo-url="${{ github.server_url }}/${{ github.repository }}"
+            
+      - name: Create Snyk outputs
+        run: |
+          set -e
+
+          vulnerabilities=0
+
+          if [ -f reports/snyk/snyk-results.json ]; then
+            cat reports/snyk/snyk-results.json | jq
+
+            vulnerabilities="$(
+              jq '
+                if type == "array" then
+                  map(.vulnerabilities // [] length ) | add
+                else
+                  (.vulnerabilities // [] length )
+                end
+              ' reports/snyk/snyk-results.json
+            )"
+          fi
+          
+          echo "vulnerabilities=${vulnerabilities}" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "### Snyk Open Source"
+            echo "- Exit code: ${exit_code}"
+            echo "- Vulnerabilities: ${vulnerabilities}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Snyk reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-reports
+          path: reports/snyk
+          if-no-files-found: error
+          retention-days: 15
