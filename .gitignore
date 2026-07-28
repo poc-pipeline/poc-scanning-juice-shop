@@ -1,3 +1,14 @@
+# env Files
+.env
+**/.env
+
+# response/ folder
+responses/
+
+# target folder
+target/
+
+
 # App
 node_modules/
 *.sqlite
