@@ -257,4 +257,43 @@ jobs:
             SNYK_VULNERABILITIES: ${{ needs.snyk.outputs.vulnerabilities }}
           run: |
             echo "Building generate normalized pipeline results"  
+            jq -n \
+              --arg repository "${GITHUB_REPOSITORY}" \
+              --arg commit "${GITHUB_SHA}" \
+              --arg run_id "${GITHUB_RUN_ID}" \
+              --arg run_attempt "${GITHUB_RUN_ATTEMPT}" \
+              --arg sonar_scan_status "${SONAR_SCAN_STATUS:-UNKNOWN}" \
+              --arg sonar_quality_gate "${SONAR_QUALITY_GATE}" \
+              --arg snyk_exit_code "${SNYK_EXIT_CODE}" \
+              --arg snyk_vulnerabilties "${SNYK_VULNERABILITIES}" \
+              '{
+                 schemaVersion: "1.0",
+                 repository:  $repository,
+                 commit: $commit,
+                 github: {
+                    runId: $run_id,
+                    runAttempt: $run_attempt 
+                 },
+                 scanners: {
+                    sonar: {
+                        scanStatus: $sonar_scan_status,
+                        qualityGate: $sonar_quality_gate
+                    },
+                    snyk: {
+                        exitCode: $snyk_exit_code,
+                        vulnerabilties:
+                          ($snyk_vulnerabilties | tonumber )
+                    } 
+                 } 
+              }' > reports/pipeline-security-summary.json
+
+              jq . reports/pipeline-security-summary.json
+
+
+        - name: Upload consolidated reports
+          uses: actions/upload-artifact@v4
+          with:
+            name: consolidated-security-reports
+            path: reports
+            retention-days: 30
 
