@@ -231,3 +231,30 @@ jobs:
           path: reports/snyk
           if-no-files-found: error
           retention-days: 15
+
+      
+    aggregate:
+      name: Aggregate scanner results
+      runs-on: ubuntu-latest
+      needs:
+        - sonar
+        - snyk
+      if: always()
+      
+      steps:
+        - name Download reports
+          uses: actions/download-artifacts@v5
+          with:
+            pattern: "*-reports"
+            path: reports
+            merge-multiple: true
+
+        - name: Generate normalized pipeline result
+          env:
+            SONAR_SCAN_STATUS: ${{  needs.sonar.outputs.scan_status }}
+            SONAR_QUALITY_GATE: ${{ needs.sonar.outputs.quality_gate }}
+            SNYK_EXIT_CODE: ${{ needs.snyk.outputs.scan_exit_code }}
+            SNYK_VULNERABILITIES: ${{ needs.snyk.outputs.vulnerabilities }}
+          run: |
+            echo "Building generate normalized pipeline results"  
+
