@@ -242,7 +242,7 @@ jobs:
       if: always()
       
       steps:
-        - name Download reports
+        - name: Download reports
           uses: actions/download-artifact@v8.0.1
           with:
             pattern: "*-reports"
