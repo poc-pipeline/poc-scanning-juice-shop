@@ -89,7 +89,7 @@ jobs:
             --output reports/sonar/issues-page-1.json  
 
       - name: Create Sonar outputs
-        id: sonar_output  
+        id: sonar_outputs  
         if: always()
         env:
           SCAN_STATUS: ${{ steps.sonar_scan.outcome }} 
@@ -257,6 +257,13 @@ jobs:
             SNYK_VULNERABILITIES: ${{ needs.snyk.outputs.vulnerabilities }}
           run: |
             echo "Building generate normalized pipeline results"  
+
+            echo "SONAR_SCAN_STATUS: ${SONAR_SCAN_STATUS}"
+            echo "SONAR_QUALITY_GATE: ${SONAR_QUALITY_GATE}"
+            echo "SNYK_EXIT_CODE: ${SNYK_EXIT_CODE}"
+            echo "SNYK_VULNERABILITIES: ${SNYK_VULNERABILITIES}"
+            echo ""
+
             jq -n \
               --arg repository "${GITHUB_REPOSITORY}" \
               --arg commit "${GITHUB_SHA}" \
